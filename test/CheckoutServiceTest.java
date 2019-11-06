@@ -1,7 +1,7 @@
 import checkout.*;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
+
+import java.time.LocalDate;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.is;
@@ -17,8 +17,8 @@ public class CheckoutServiceTest {
         checkoutService = new CheckoutService();
         checkoutService.openCheck();
 
-        milk_7 = new Product(7, "Milk", Category.MILK);
-        bred_3 = new Product(3, "Bred");
+        milk_7 = new Product(7, "Milk", Category.MILK, Trademark.Milk_and_the_City);
+        bred_3 = new Product(3, "Bred", Trademark.Organic_milk);
     }
 
     @Test
@@ -63,7 +63,7 @@ public class CheckoutServiceTest {
         checkoutService.addProduct(milk_7);
         checkoutService.addProduct(bred_3);
 
-        checkoutService.addOffer(new AnyGoodsOffer(6, 2));
+        checkoutService.addOffer(new AnyGoodsOffer(6, 2, LocalDate.now().plusDays(1)));
         Check check = checkoutService.closeCheck();
 
         assertThat(check.getTotalPoints(), is(12));
@@ -73,7 +73,7 @@ public class CheckoutServiceTest {
     void useOffer__whenCostLessThanRequired__doNothing() {
         checkoutService.addProduct(bred_3);
 
-        checkoutService.addOffer(new AnyGoodsOffer(6, 2));
+        checkoutService.addOffer(new AnyGoodsOffer(6, 2, LocalDate.now().plusDays(1)));
         Check check = checkoutService.closeCheck();
 
         assertThat(check.getTotalPoints(), is(3));
@@ -85,7 +85,7 @@ public class CheckoutServiceTest {
         checkoutService.addProduct(milk_7);
         checkoutService.addProduct(bred_3);
 
-        checkoutService.addOffer(new FactorByCategoryOffer(Category.MILK, 2));
+        checkoutService.addOffer(new FactorByCategoryOffer(Category.MILK, 2, LocalDate.now().plusDays(1)));
         Check check = checkoutService.closeCheck();
 
         assertThat(check.getTotalPoints(), is(31));
@@ -94,10 +94,10 @@ public class CheckoutServiceTest {
     @Test
     void useOffer__closeCheckout() {
         Check check = checkoutService.closeCheck();
-        milk_7 = new Product(7, "Milk", Category.MILK);
-        milk_7 = new Product(7, "Milk", Category.MILK);
-        milk_7 = new Product(7, "Milk", Category.MILK);
-        bred_3 = new Product(3, "Bred");
+        milk_7 = new Product(7, "Milk", Category.MILK, Trademark.Milk_and_the_City);
+        milk_7 = new Product(7, "Milk", Category.MILK, Trademark.Organic_milk);
+        milk_7 = new Product(7, "Milk", Category.MILK, Trademark.Organic_milk);
+        bred_3 = new Product(3, "Bred", Trademark.Organic_milk);
         checkoutService.addProduct(milk_7);
         checkoutService.addProduct(bred_3);
         assertThat(check.getTotalPoints(), is(0));
@@ -109,35 +109,59 @@ public class CheckoutServiceTest {
         checkoutService.openCheck();
         checkoutService.addProduct(milk_7);
         checkoutService.addProduct(bred_3);
-        checkoutService.addOffer(new FactorByCategoryOffer(Category.MILK, 2));
 
-        checkoutService.addOffer(new AnyGoodsOffer(6, 2, 2050, 10, 10));
-        checkoutService.addOffer(new AnyGoodsOffer(6, 2, 2012, 10, 10));
+        checkoutService.addOffer(new AnyGoodsOffer(6, 2, LocalDate.now().plusDays(1))); //12
+        checkoutService.addOffer(new AnyGoodsOffer(6, 2, LocalDate.of(2012, 10, 10)));
+        checkoutService.addOffer(new AnyGoodsOffer(6, 2, LocalDate.of(2012, 5, 10)));
 
-        checkoutService.addOffer(new AnyGoodsOffer(6, 2, 2012, -1, 10));
-
-        checkoutService.addOffer(new FactorByCategoryOffer(Category.MILK, 2, 2050, 10, 10));
-        checkoutService.addOffer(new FactorByCategoryOffer(Category.MILK, 2, 2015, 10, 10));
+        checkoutService.addOffer(new FactorByCategoryOffer(Category.MILK, 2, LocalDate.now().plusDays(1)));
+        checkoutService.addOffer(new FactorByCategoryOffer(Category.MILK, 2, LocalDate.of(2015, 10, 10)));
 
         Check check = checkoutService.closeCheck();
-
-        assertThat(check.getTotalPoints(), is(26));
+        assertThat(check.getTotalPoints(), is(19));
 
     }
 
     @Test
     void add__delete__offers() {
         checkoutService = new CheckoutService();
-        checkoutService.addOffer(new FactorByCategoryOffer(Category.MILK, 2,2035,1,1));
-        checkoutService.addOffer(new FactorByCategoryOffer(Category.MILK, 2,2036,2,5));
-        checkoutService.addOffer(new FactorByCategoryOffer(Category.MILK, 2,2037,3,9));
-        checkoutService.addOffer(new FactorByCategoryOffer(Category.MILK, 2,2040,10,12));
+        checkoutService.addOffer(new FactorByCategoryOffer(Category.MILK, 2, LocalDate.now().plusDays(1)));
+        checkoutService.addOffer(new FactorByCategoryOffer(Category.MILK, 2,LocalDate.now().plusDays(1)));
+        checkoutService.addOffer(new FactorByCategoryOffer(Category.MILK, 2,LocalDate.now().plusDays(1)));
+        checkoutService.addOffer(new FactorByCategoryOffer(Category.MILK, 2, LocalDate.now().plusDays(1)));
 
         Assertions.assertEquals(checkoutService.getOffers().size(), 4);
-
-        checkoutService.deleteOffer(new FactorByCategoryOffer(Category.MILK, 2,2035,1,1));
-
-        Assertions.assertEquals(checkoutService.getOffers().size(), 3);
-    }
+        checkoutService.deleteAllOffers();
+        Assertions.assertEquals(checkoutService.getOffers().size(), 0);
 
     }
+
+    @Nested
+    @DisplayName("FactorByTrademarkTest")
+    class FactorByTrademarkTest {
+        @Test
+        void checkFactorByTrademark() {
+            checkoutService = new CheckoutService();
+            checkoutService.addProduct(new Product(6, "milk", Category.MILK, Trademark.Organic_milk));
+            checkoutService.addOffer(new FactorByTrademarkOffer(2,Trademark.Organic_milk,LocalDate.now().plusDays(1)));
+
+            Check check = checkoutService.closeCheck();
+            assertThat(check.getTotalPoints(), is(12));
+        }
+    }
+
+    @Nested
+    @DisplayName("FactorByProductTest")
+    class FactorByProductTest {
+        @Test
+        void checkFactorByTrademark() {
+            checkoutService = new CheckoutService();
+            checkoutService.addProduct(new Product(6, "milk", Category.MILK, Trademark.Organic_milk));
+            checkoutService.addProduct(new Product(6, "someElse", Category.MILK, Trademark.Organic_milk));
+            checkoutService.addOffer(new FactorByProductOffer(3,"milk",LocalDate.now().plusDays(1)));
+
+            Check check = checkoutService.closeCheck();
+            assertThat(check.getTotalPoints(), is(24));
+        }
+    }
+}

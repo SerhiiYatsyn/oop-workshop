@@ -4,20 +4,10 @@ import java.time.DateTimeException;
 import java.time.LocalDate;
 
 public abstract class Offer {
-    protected int expirationDateYear;
-    protected int expirationDateMonth;
-    protected int expirationDateDay;
+    LocalDate expirationDate;
 
-    protected boolean checkSelfLife() {
-        if(expirationDateYear == 0 && expirationDateMonth == 0 && expirationDateDay == 0) return true;
-        LocalDate now,offerTime;
-        try {
-            now = LocalDate.now();
-            offerTime = LocalDate.of(expirationDateYear, expirationDateMonth, expirationDateDay);
-        } catch (DateTimeException e) {
-            return false;
-        }
-        return now.isBefore(offerTime);
+    protected boolean checkExpirationDate() {
+        return LocalDate.now().isBefore(expirationDate);
     }
 
     public abstract void apply(Check check);
