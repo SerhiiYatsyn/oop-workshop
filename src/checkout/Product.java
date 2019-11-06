@@ -12,6 +12,7 @@ public class Product {
     }
 
     public Product(int price, String name) {
-        this(price, name, null);
+        this(price, name, null
+        );
     }
 }
