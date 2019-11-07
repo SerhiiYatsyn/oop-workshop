@@ -15,10 +15,19 @@ public class FactorByTrademarkOffer extends Offer {
     }
 
     @Override
-    public void apply(Check check) {
-        if(this.checkExpirationDate()){
-            int points = check.getCostByTrademark(trademark);
-            check.addPoints(points * (factor-1));
-        }
+    protected boolean condition(Check check) {
+        return true;
     }
+
+    @Override
+    protected int calculateBonus(Check check) {
+        return check.getCostByTrademark(trademark) * (factor - 1);
+    }
+
+//    @Override
+//    public void apply(Check check) {
+//            int points = check.getCostByTrademark(trademark);
+//            check.addPoints(points * (factor-1));
+//        }
+//    }
 }

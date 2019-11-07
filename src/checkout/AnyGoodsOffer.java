@@ -12,10 +12,21 @@ public class AnyGoodsOffer extends Offer {
         this.expirationDate = expirationDate;
     }
 
+    @Override
+    protected boolean condition(Check check) {
+        return totalCost <= check.getTotalCost();
+    }
 
     @Override
-    public void apply(Check check) {
-        if (totalCost <= check.getTotalCost() && this.checkExpirationDate())
-            check.addPoints(points);
+    protected int calculateBonus(Check check) {
+        return points;
     }
+
+//    @Override
+//    public void apply(Check check) {
+//        if (totalCost <= check.getTotalCost())
+//            check.addPoints(points);
+//    }
+
+
 }

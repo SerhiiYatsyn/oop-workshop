@@ -15,10 +15,19 @@ public class FactorByCategoryOffer extends Offer {
     }
 
     @Override
-    public void apply(Check check) {
-        if (this.checkExpirationDate()) {
-            int points = check.getCostByCategory(category);
-            check.addPoints(points * (factor - 1));
-        }
+    protected boolean condition(Check check) {
+        return true;
     }
+
+    @Override
+    protected int calculateBonus(Check check) {
+        return check.getCostByCategory(category) * (factor - 1);
+    }
+
+//    @Override
+//    public void apply(Check check) {
+//            int points = check.getCostByCategory(category);
+//            check.addPoints(points * (factor - 1));
+//        }
+//    }
 }
