@@ -12,6 +12,9 @@ public class CheckoutServiceTest {
     private CheckoutService checkoutService;
     private Product bred_3;
 
+    final private LocalDate YESTERDAY = LocalDate.now().minusDays(1);
+    final private LocalDate TOMORROW = LocalDate.now().plusDays(1);
+
     @BeforeEach
     void setUp() {
         checkoutService = new CheckoutService();
@@ -63,7 +66,7 @@ public class CheckoutServiceTest {
         checkoutService.addProduct(milk_7);
         checkoutService.addProduct(bred_3);
 
-        checkoutService.addOffer(new AnyGoodsOffer(6, 2, LocalDate.now().plusDays(1)));
+        checkoutService.addOffer(new AnyGoodsOffer(6, 2, TOMORROW));
         Check check = checkoutService.closeCheck();
 
         assertThat(check.getTotalPoints(), is(12));
@@ -73,7 +76,7 @@ public class CheckoutServiceTest {
     void useOffer__whenCostLessThanRequired__doNothing() {
         checkoutService.addProduct(bred_3);
 
-        checkoutService.addOffer(new AnyGoodsOffer(6, 2, LocalDate.now().plusDays(1)));
+        checkoutService.addOffer(new AnyGoodsOffer(6, 2, TOMORROW));
         Check check = checkoutService.closeCheck();
 
         assertThat(check.getTotalPoints(), is(3));
@@ -85,7 +88,7 @@ public class CheckoutServiceTest {
         checkoutService.addProduct(milk_7);
         checkoutService.addProduct(bred_3);
 
-        checkoutService.addOffer(new FactorByCategoryOffer(Category.MILK, 2, LocalDate.now().plusDays(1)));
+        checkoutService.addOffer(new FactorByCategoryOffer(Category.MILK, 2, TOMORROW));
         Check check = checkoutService.closeCheck();
 
         assertThat(check.getTotalPoints(), is(31));
@@ -110,12 +113,12 @@ public class CheckoutServiceTest {
         checkoutService.addProduct(milk_7);
         checkoutService.addProduct(bred_3);
 
-        checkoutService.addOffer(new AnyGoodsOffer(6, 2, LocalDate.now().plusDays(1))); //12
-        checkoutService.addOffer(new AnyGoodsOffer(6, 2, LocalDate.of(2012, 10, 10)));
-        checkoutService.addOffer(new AnyGoodsOffer(6, 2, LocalDate.of(2012, 5, 10)));
+        checkoutService.addOffer(new AnyGoodsOffer(6, 2, TOMORROW)); //12
+        checkoutService.addOffer(new AnyGoodsOffer(6, 2, YESTERDAY));
+        checkoutService.addOffer(new AnyGoodsOffer(6, 2, YESTERDAY));
 
-        checkoutService.addOffer(new FactorByCategoryOffer(Category.MILK, 2, LocalDate.now().plusDays(1)));
-        checkoutService.addOffer(new FactorByCategoryOffer(Category.MILK, 2, LocalDate.of(2015, 10, 10)));
+        checkoutService.addOffer(new FactorByCategoryOffer(Category.MILK, 2, TOMORROW));
+        checkoutService.addOffer(new FactorByCategoryOffer(Category.MILK, 2, YESTERDAY));
 
         Check check = checkoutService.closeCheck();
         assertThat(check.getTotalPoints(), is(19));
@@ -125,10 +128,10 @@ public class CheckoutServiceTest {
     @Test
     void add__delete__offers() {
         checkoutService = new CheckoutService();
-        checkoutService.addOffer(new FactorByCategoryOffer(Category.MILK, 2, LocalDate.now().plusDays(1)));
-        checkoutService.addOffer(new FactorByCategoryOffer(Category.MILK, 2,LocalDate.now().plusDays(1)));
-        checkoutService.addOffer(new FactorByCategoryOffer(Category.MILK, 2,LocalDate.now().plusDays(1)));
-        checkoutService.addOffer(new FactorByCategoryOffer(Category.MILK, 2, LocalDate.now().plusDays(1)));
+        checkoutService.addOffer(new FactorByCategoryOffer(Category.MILK, 2, TOMORROW));
+        checkoutService.addOffer(new FactorByCategoryOffer(Category.MILK, 2, TOMORROW));
+        checkoutService.addOffer(new FactorByCategoryOffer(Category.MILK, 2, TOMORROW));
+        checkoutService.addOffer(new FactorByCategoryOffer(Category.MILK, 2, TOMORROW));
 
         Assertions.assertEquals(checkoutService.getOffers().size(), 4);
         checkoutService.deleteAllOffers();
@@ -143,7 +146,7 @@ public class CheckoutServiceTest {
         void checkFactorByTrademark() {
             checkoutService = new CheckoutService();
             checkoutService.addProduct(new Product(6, "milk", Category.MILK, Trademark.Organic_milk));
-            checkoutService.addOffer(new FactorByTrademarkOffer(2,Trademark.Organic_milk,LocalDate.now().plusDays(1)));
+            checkoutService.addOffer(new FactorByTrademarkOffer(2, Trademark.Organic_milk, TOMORROW));
 
             Check check = checkoutService.closeCheck();
             assertThat(check.getTotalPoints(), is(12));
@@ -158,10 +161,25 @@ public class CheckoutServiceTest {
             checkoutService = new CheckoutService();
             checkoutService.addProduct(new Product(6, "milk", Category.MILK, Trademark.Organic_milk));
             checkoutService.addProduct(new Product(6, "someElse", Category.MILK, Trademark.Organic_milk));
-            checkoutService.addOffer(new FactorByProductOffer(3,"milk",LocalDate.now().plusDays(1)));
+            checkoutService.addOffer(new FactorByProductOffer(3, "milk", TOMORROW));
 
             Check check = checkoutService.closeCheck();
             assertThat(check.getTotalPoints(), is(24));
+        }
+    }
+
+    @Nested
+    @DisplayName("HalfPriceOfferTest")
+    class HalfPriceOfferTest {
+        @Test
+        void checkFactorByTrademark() {
+            checkoutService = new CheckoutService();
+            checkoutService.addProduct(new Product(6, "milk", Category.MILK, Trademark.Organic_milk)); // 3
+            checkoutService.addProduct(new Product(6, "someElse", Category.MILK, Trademark.Organic_milk)); // 9
+            checkoutService.addOffer(new HalfPriceOffer("milk", TOMORROW));
+
+            Check check = checkoutService.closeCheck();
+            assertThat(check.getTotalPoints(), is(9));
         }
     }
 }

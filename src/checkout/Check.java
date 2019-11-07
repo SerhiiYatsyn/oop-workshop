@@ -1,9 +1,7 @@
 package checkout;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class Check {
     private List<Product> products = new ArrayList<>();
@@ -33,21 +31,28 @@ public class Check {
         return products.stream()
                 .filter(p -> p.category == category)
                 .mapToInt(p -> p.price)
-                .reduce(0, (a, b) -> a + b);
+                .reduce(0, Integer::sum);
     }
 
     int getCostByTrademark(Trademark trademark) {
         return products.stream()
                 .filter(p -> p.trademark == trademark)
                 .mapToInt(p -> p.price)
-                .reduce(0, (a, b) -> a + b);
+                .reduce(0, Integer::sum);
     }
 
     int getCostByProduct(String name) {
         return products.stream()
-                .filter(p -> p.name == name)
+                .filter(p -> p.name.equals(name))
                 .mapToInt(p -> p.price)
-                .reduce(0, (a, b) -> a + b);
+                .reduce(0, Integer::sum);
+    }
+
+    int getHalfPriceOnProduct(String name) {
+        return products.stream()
+                .filter(p -> p.name.equals(name))
+                .mapToInt(p -> p.price/2)
+                .reduce(0, Integer::sum);
     }
 
 }

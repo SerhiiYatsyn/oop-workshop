@@ -1,8 +1,6 @@
 package checkout;
 
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
 
 public class FactorByProductOffer extends Offer {
     private final int factor;

@@ -1,6 +1,5 @@
 package checkout;
 
-import java.time.DateTimeException;
 import java.time.LocalDate;
 
 public class FactorByCategoryOffer extends Offer {

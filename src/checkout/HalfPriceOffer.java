@@ -2,13 +2,11 @@ package checkout;
 
 import java.time.LocalDate;
 
-public class FactorByTrademarkOffer extends Offer {
-    private final int factor;
-    private Trademark trademark;
+public class HalfPriceOffer extends Offer {
+    private String productName;
 
-    public FactorByTrademarkOffer(int factor, Trademark trademark, LocalDate expirationDate) {
-        this.factor = factor;
-        this.trademark = trademark;
+    public HalfPriceOffer(String productName, LocalDate expirationDate) {
+        this.productName = productName;
         this.expirationDate = expirationDate;
     }
 
@@ -19,7 +17,7 @@ public class FactorByTrademarkOffer extends Offer {
 
     @Override
     protected int calculateBonus(Check check) {
-        return check.getCostByTrademark(trademark) * (factor - 1);
+        return -check.getHalfPriceOnProduct(productName);
     }
 
 //    @Override
